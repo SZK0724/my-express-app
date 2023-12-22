@@ -16,10 +16,10 @@ const swaggerOptions = {
 };
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-process.env.MONGODB_URI='mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/';
+
 // MongoDB client setup
-const uri = process.env.MONGODB_URI; // Use environment variable for URI
-const client = new MongoClient(uri, {
+ // Use environment variable for URI
+const client = new MongoClient(process.env.MONGODB_URI, {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
