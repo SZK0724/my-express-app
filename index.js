@@ -26,6 +26,24 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/";
+
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+client.connect().then(res => {
+  console.log(res);
+});
+
+app.use(express.json());
+
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
