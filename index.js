@@ -6,13 +6,20 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Hello World API',
-      version: '1.0.0',
+    definition: {
+      openapi: '3.0.0',
+      // ... other options ...
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
-  },
+  
   apis: ['./routes/*.js'], // path to API docs
 };
 
