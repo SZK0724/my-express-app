@@ -1,51 +1,41 @@
-const express = require('express');
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsDoc = require('swagger-jsdoc');
-const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+const express = require('express');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Swagger configuration
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        // ... other options ...
-    },
-    apis: ['./routes/*.js'], // Make sure this path is correct
-};
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
 // MongoDB client setup
- // Use environment variable for URI
 const client = new MongoClient(process.env.MONGODB_URI, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverApi: ServerApiVersion.v1
 });
 
 // Connect to MongoDB
-client.connect()
-    .then(() => {
+async function connectToMongoDB() {
+    try {
+        await client.connect();
         console.log('Connected to MongoDB');
-    })
-    .catch(err => {
+    } catch (err) {
         console.error('Failed to connect to MongoDB', err);
-    });
+        process.exit(1); // Exit the process if MongoDB connection fails
+    }
+}
 
 app.use(express.json());
 
-// Routes
-const helloRoutes = require('./routes/hello'); // Ensure this file exists and is correctly implemented
-app.use(helloRoutes);
+// Your routes and other code here...
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+async function startServer() {
+    await connectToMongoDB();
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+}
+
+startServer();
