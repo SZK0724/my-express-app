@@ -1,39 +1,50 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
-const { MongoClient } = require('mongodb');
-
+const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Replace <dbname> with the actual name of your database
-const mongoUri = process.env.MONGODB_URI || "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/<benr2423>?retryWrites=true&w=majority";
-
+// Swagger configuration
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        // ... other options ...
+    },
+    apis: ['./routes/*.js'], // Make sure this path is correct
+};
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // MongoDB client setup
-const client = new MongoClient(mongoUri);
-
-async function connectToMongoDB() {
-    try {
-        await client.connect();
-        console.log('Connected to MongoDB');
-        // Here you can set up your routes that require a database connection
-    } catch (err) {
-        console.error('Failed to connect to MongoDB', err);
-        // If MongoDB connection fails, you might want to handle it differently or exit the process
+const uri = process.env.MONGODB_URI; // Use environment variable for URI
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
     }
-}
+});
 
-// Swagger setup omitted for brevity...
+// Connect to MongoDB
+client.connect()
+    .then(() => {
+        console.log('Connected to MongoDB');
+    })
+    .catch(err => {
+        console.error('Failed to connect to MongoDB', err);
+    });
+
+app.use(express.json());
+
+// Routes
+const helloRoutes = require('./routes/hello'); // Ensure this file exists and is correctly implemented
+app.use(helloRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+    res.send('Hello World!');
 });
 
-// Connection to MongoDB and server start
-connectToMongoDB().then(() => {
-  app.listen(port, () => {
+app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-  });
 });
-
-// Routes setup omitted for brevity...
