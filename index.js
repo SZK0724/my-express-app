@@ -1,33 +1,31 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// MongoDB URI. In production, this will be set in Azure's Application Settings.
-const uri = process.env.MONGODB_URI || "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/";;
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Hello World API',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./routes/*.js'], // path to API docs
+};
 
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
 });
 
-app.use(express.json());
-
-client.connect(err => {
-  if (err) {
-    console.error('Database connection failed', err);
-    process.exit();
-  }
-  console.log('Connected to MongoDB');
-
-  // Define routes here
-  app.get('/', (req, res) => {
-    res.send('Hello World!');
-  });
-
-  // Start the Express server
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
+
+const helloRoutes = require('./routes/hello');
+app.use(helloRoutes);
