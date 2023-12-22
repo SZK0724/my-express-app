@@ -1,41 +1,39 @@
-require('dotenv').config();
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// MongoDB client setup
-const client = new MongoClient(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverApi: ServerApiVersion.v1
-});
+// Replace <dbname> with the actual name of your database
+const mongoUri = process.env.MONGODB_URI || "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/<benr2423>?retryWrites=true&w=majority";
 
-// Connect to MongoDB
+// MongoDB client setup
+const client = new MongoClient(mongoUri);
+
 async function connectToMongoDB() {
     try {
         await client.connect();
         console.log('Connected to MongoDB');
+        // Here you can set up your routes that require a database connection
     } catch (err) {
         console.error('Failed to connect to MongoDB', err);
-        process.exit(1); // Exit the process if MongoDB connection fails
+        // If MongoDB connection fails, you might want to handle it differently or exit the process
     }
 }
 
-app.use(express.json());
-
-// Your routes and other code here...
+// Swagger setup omitted for brevity...
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+  res.send('Hello World!');
 });
 
-async function startServer() {
-    await connectToMongoDB();
-    app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
-    });
-}
+// Connection to MongoDB and server start
+connectToMongoDB().then(() => {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+});
 
-startServer();
+// Routes setup omitted for brevity...
