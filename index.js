@@ -17,26 +17,6 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// MongoDB client setup
-const uri = process.env.MONGODB_URI; // Use environment variable for URI
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-
-// Connect to MongoDB
-client.connect()
-    .then(() => {
-        console.log('Connected to MongoDB');
-    })
-    .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
-    });
-
-app.use(express.json());
 
 // Routes
 const helloRoutes = require('./routes/hello'); // Ensure this file exists and is correctly implemented
