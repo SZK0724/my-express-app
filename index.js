@@ -16,8 +16,9 @@ const swaggerOptions = {
 };
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 // MongoDB client setup
-const uri = "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/<benr2423>?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI; // Use environment variable for URI
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
