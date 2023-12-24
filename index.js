@@ -68,6 +68,40 @@ app.get('/view/visitor/security', verifyToken, async (req, res) => {
   }
 });
 
+app.delete('/delete/user/:username', verifyToken, async (req, res) => {
+  const username = req.params.username;
+
+  try {
+    // Delete the user
+    const deleteUserResult = await client
+      .db('benr2423')
+      .collection('users')
+      .deleteOne({ username });
+
+    if (deleteUserResult.deletedCount === 0) {
+      return res.status(404).send('User not found');
+    }
+
+    // Delete the user's documents
+    const deleteDocumentsResult = await client
+      .db('benr2423')
+      .collection('documents')
+      .deleteMany({ username });
+
+    // Delete the visitors created by the user
+    const deleteVisitorsResult = await client
+      .db('benr2423')
+      .collection('visitor')
+      .deleteMany({ createdBy: username });
+
+    res.send('User and associated data deleted successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 function generateToken(userData) {
   const token = jwt.sign(
     userData,
@@ -118,3 +152,6 @@ app.use(login_security_Routes);
 
 const view_visitor_securityRoutes = require('./routes/view-visitor-security');
 app.use(view_visitor_securityRoutes);
+
+const delete_user_securityRoutes = require('./routes/delete-user-security');
+app.use(delete_user_securityRoutes);
