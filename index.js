@@ -118,6 +118,38 @@ app.post('/login/user', (req, res) => {
     });
 });
 
+app.post('/create/visitor/user', verifyToken, async (req, res) => {
+  const createdBy = req.user.username; // Get the username from the decoded token
+  let result = createvisitor(
+    req.body.visitorname,
+    req.body.checkintime,
+    req.body.checkouttime,
+    req.body.temperature,
+    req.body.gender,
+    req.body.ethnicity,
+    req.body.age,
+    req.body.phonenumber,
+    createdBy
+  );   
+  res.send(result);
+});
+
+app.get('/view/visitor/user', verifyToken, async (req, res) => {
+  try {
+    const username = req.user.username; // Get the username from the decoded token
+    const result = await client
+      .db('benr2423')
+      .collection('visitor')
+      .find({ createdBy: username }) // Retrieve visitors created by the authenticated user
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 
 function generateToken(userData) {
@@ -176,3 +208,9 @@ app.use(delete_user_securityRoutes);
 
 const login_user_Routes = require('./routes/login-user');
 app.use(login_user_Routes);
+
+const create_visitor_user_Routes = require('./routes/create-visitor-user');
+app.use(create_visitor_user_Routes);
+
+const view_visitor_user_Routes = require('./routes/view-visitor-user');
+app.use(view_visitor_user_Routes);
