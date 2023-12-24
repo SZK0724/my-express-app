@@ -67,8 +67,8 @@ app.post('/login/security', (req, res) => {
   login(req.body.username, req.body.password)
     .then(result => {
       if (result.message === 'Correct password') {
-  
-        res.send(  'Successful login');
+        const token = generateToken({ username: req.body.username });
+        res.send({ message: 'Successful login', token });
       } else {
         res.send('Login unsuccessful');
       }
@@ -294,11 +294,7 @@ function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime,reqTemper
 }
 
 
-
-
-
-
-
+const jwt = require('jsonwebtoken');
 
 function generateToken(userData) {
   const token = jwt.sign(
@@ -311,7 +307,6 @@ function generateToken(userData) {
   return token;
 }
 
-const jwt = require('jsonwebtoken');
 
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
