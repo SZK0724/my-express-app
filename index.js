@@ -1,31 +1,27 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerDocument = require('./package.json');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Hello World API',
-      version: '1.0.0',
-    },
-  },
-  apis: ['./routes/*.js'], // path to API docs
-};
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// BodyParser Middleware
+app.use(bodyParser.json());
 
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Define routes here
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+    res.send('Hello World');
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
 
-const helloRoutes = require('./routes/hello');
-app.use(helloRoutes);
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
