@@ -53,6 +53,53 @@ app.post('/login/security', (req, res) => {
     });
 });
 
+app.get('/view/visitor/security', verifyToken, async (req, res) => {
+  try {
+    const result = await client
+      .db('benr2423')
+      .collection('visitor')
+      .find()
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+function generateToken(userData) {
+  const token = jwt.sign(
+    userData,
+    'mypassword',
+    { expiresIn: 60 }
+  );
+
+  console.log(token);
+  return token;
+}
+
+function verifyToken(req, res, next) {
+  let header = req.headers.authorization;
+  if (!header) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+
+  let token = header.split(' ')[1];
+
+  jwt.verify(token, 'mypassword', function (err, decoded) {
+    if (err) {
+      res.status(401).send('Unauthorized');
+      return;
+    }
+    req.user = decoded;
+    next();
+  });
+}
+
+
+
 
 
 
@@ -68,3 +115,6 @@ app.use(register_users_Routes);
 
 const login_security_Routes = require('./routes/login-security');
 app.use(login_security_Routes);
+
+const view_visitor_securityRoutes = require('./routes/view-visitor-security');
+app.use(view_visitor_securityRoutes);
