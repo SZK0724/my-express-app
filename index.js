@@ -67,8 +67,8 @@ app.post('/login/security', (req, res) => {
   login(req.body.username, req.body.password)
     .then(result => {
       if (result.message === 'Correct password') {
-        const token = generateToken({ username: req.body.username });
-        res.send({ message: 'Successful login', token });
+  
+        res.send(  'Successful login');
       } else {
         res.send('Login unsuccessful');
       }
