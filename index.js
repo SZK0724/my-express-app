@@ -150,6 +150,27 @@ app.get('/view/visitor/user', verifyToken, async (req, res) => {
   }
 });
 
+app.delete('/delete/visitor/:visitorname', verifyToken, async (req, res) => {
+  const visitorname = req.params.visitorname;
+  const username = req.user.username; // Assuming the username is available in the req.user object
+
+  try {
+    // Find the visitor by visitorname and createdBy field to ensure the visitor belongs to the user
+    const deleteVisitorResult = await client
+      .db('benr2423')
+      .collection('visitor')
+      .deleteOne({ visitorname: visitorname, createdBy: username });
+
+    if (deleteVisitorResult.deletedCount === 0) {
+      return res.status(404).send('Visitor not found or unauthorized');
+    }
+
+    res.send('Visitor deleted successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 
 function generateToken(userData) {
@@ -214,3 +235,6 @@ app.use(create_visitor_user_Routes);
 
 const view_visitor_user_Routes = require('./routes/view-visitor-user');
 app.use(view_visitor_user_Routes);
+
+const delete_visitor_user_Routes = require('./routes/delete-visitor-user');
+app.use(delete_visitor_user_Routes);
