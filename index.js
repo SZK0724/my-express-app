@@ -101,6 +101,24 @@ app.delete('/delete/user/:username', verifyToken, async (req, res) => {
   }
 });
 
+app.post('/login/user', (req, res) => {
+  console.log(req.body);
+  loginuser(req.body.username, req.body.password)
+    .then(result => {
+      if (result.message === 'Correct password') {
+        const token = generateToken({ username: req.body.username });
+        res.send({ message: 'Successful login', token });
+      } else {
+        res.send('Login unsuccessful');
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    });
+});
+
+
 
 function generateToken(userData) {
   const token = jwt.sign(
@@ -155,3 +173,6 @@ app.use(view_visitor_securityRoutes);
 
 const delete_user_securityRoutes = require('./routes/delete-user-security');
 app.use(delete_user_securityRoutes);
+
+const login_user_Routes = require('./routes/login-user');
+app.use(login_user_Routes);
