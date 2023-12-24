@@ -5,7 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./package.json');
 
 const app = express();
-
+const MONGODB_URI="mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/";
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB Connected'))
