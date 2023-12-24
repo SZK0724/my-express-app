@@ -197,6 +197,27 @@ app.put('/update/visitor/:visitorname', verifyToken, async (req, res) => {
   }
 });
 
+app.get('/view/visitor/:visitorName', async (req, res) => {
+  const visitorName = req.params.visitorName;
+
+  try {
+    const result = await client
+      .db('benr2423')
+      .collection('visitor')
+      .findOne({ visitorname: visitorName });
+
+    if (result) {
+      res.send(result);
+    } else {
+      res.status(404).send('Visitor not found');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 
 function generateToken(userData) {
   const token = jwt.sign(
@@ -227,8 +248,6 @@ function verifyToken(req, res, next) {
     next();
   });
 }
-
-
 
 
 
@@ -266,3 +285,6 @@ app.use(delete_visitor_user_Routes);
 
 const update_visitor_user_Routes = require('./routes/update-visitor-user');
 app.use(update_visitor_user_Routes);
+
+const view_visitor_Routes = require('./routes/view-visitor');
+app.use(view_visitor_Routes);

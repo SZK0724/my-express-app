@@ -61,8 +61,8 @@ const router = express.Router();
  */
 
 
-router.get('/update/visitor/{visitorname}', (req, res) => {
-    res.send('/update/visitor/{visitorname}');
+router.get('/view/visitor/:visitorName', (req, res) => {
+    res.send('/view/visitor/:visitorName');
   });
   
   module.exports = router;
