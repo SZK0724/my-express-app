@@ -218,6 +218,61 @@ app.get('/view/visitor/:visitorName', async (req, res) => {
 });
 
 
+async function login(reqUsername, reqPassword) {
+  let matchUser = await client.db('benr2423').collection('security').findOne({ username: { $eq: reqUsername } });
+
+  if (!matchUser)
+    return { message: "User not found!" };
+
+  if (matchUser.password === reqPassword)
+    return { message: "Correct password", user: matchUser };
+  else
+    return { message: "Invalid password" };
+}
+
+async function loginuser(reqUsername, reqPassword) {
+  let matchUser = await client.db('benr2423').collection('users').findOne({ username: { $eq: reqUsername } });
+
+  if (!matchUser)
+    return { message: "User not found!" };
+
+  if (matchUser.password === reqPassword)
+    return { message: "Correct password", user: matchUser };
+  else
+    return { message: "Invalid password" };
+}
+
+function register(reqUsername, reqPassword, reqName, reqEmail) {
+  client.db('benr2423').collection('users').insertOne({
+    "username": reqUsername,
+    "password": reqPassword,
+    "name": reqName,
+    "email": reqEmail,
+  });
+  return "account created";
+}
+///create visitor 
+function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime,reqTemperature,reqGender,reqEthnicity,reqAge,ReqPhonenumber, createdBy) {
+  client.db('benr2423').collection('visitor').insertOne({
+    "visitorname": reqVisitorname,
+    "checkintime": reqCheckintime,
+    "checkouttime": reqCheckouttime,
+    "temperature":reqTemperature,
+    "gender":reqGender,
+    "ethnicity":reqEthnicity,
+    "age":reqAge,
+    "phonenumber":ReqPhonenumber,
+    "createdBy": createdBy // Add the createdBy field with the username
+  });
+  return "visitor created";
+}
+
+
+
+
+
+
+
 
 function generateToken(userData) {
   const token = jwt.sign(
