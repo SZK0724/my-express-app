@@ -36,6 +36,23 @@ app.post('/register/user', async (req, res) => {
   res.send(result);
 });
 
+app.post('/login/security', (req, res) => {
+  console.log(req.body);
+  login(req.body.username, req.body.password)
+    .then(result => {
+      if (result.message === 'Correct password') {
+        const token = generateToken({ username: req.body.username });
+        res.send({ message: 'Successful login', token });
+      } else {
+        res.send('Login unsuccessful');
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    });
+});
+
 
 
 
@@ -48,3 +65,6 @@ app.use(hello_Routes);
 
 const register_users_Routes = require('./routes/register-user');
 app.use(register_users_Routes);
+
+const login_security_Routes = require('./routes/login-security');
+app.use(login_security_Routes);

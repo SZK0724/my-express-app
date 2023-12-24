@@ -36,7 +36,7 @@ const router = express.Router();
  */
 
  router.get('/register/user', (req, res) => {
-    res.send('你要什么!');
+    res.send('/register/user');
   });
   
   module.exports = router;
