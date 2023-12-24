@@ -25,10 +25,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-
 app.post('/register/user', async (req, res) => {
   let result = register(
     req.body.username,
@@ -43,7 +39,12 @@ app.post('/register/user', async (req, res) => {
 
 
 
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
+const hello_Routes = require('./routes/hello');
+app.use(hello_Routes);
 
-const helloRoutes = require('./routes/hello');
-app.use(helloRoutes);
+const register_users_Routes = require('./routes/register-user');
+app.use(register_users_Routes);
