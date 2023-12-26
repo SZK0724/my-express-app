@@ -30,9 +30,9 @@ const swaggerOptions = {
       5. To delete a visitor pass that you previously created, navigate to the "User" -> "/delete/visitor/{visitorname}" section and follow the instructions.
 
       6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "/view/visitor/user" section.
-      
 
-      **Instructions for Visotor to Get Their Pass**:
+
+      **Instructions for Visitor to Get Their Pass**:
 
       7. To access and view your visitor pass, please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
       
@@ -86,13 +86,12 @@ client.connect().then(res => {
 
 
 
-
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 app.post('/register/user', async (req, res) => {
-  let result = register(
+  let result = validateAndRegister(
     req.body.username,
     req.body.password,
     req.body.name,
@@ -308,15 +307,30 @@ async function loginuser(reqUsername, reqPassword) {
     return { message: "Invalid password" };
 }
 
-function register(reqUsername, reqPassword, reqName, reqEmail) {
+function validateAndRegister(reqUsername, reqPassword, reqName, reqEmail) {
+  // Check if the password is strong
+  if (!isPasswordStrong(reqPassword)) {
+    return "Weak password. Password must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols.";
+  }
+
+  // If the password is strong, proceed to register the user
   client.db('benr2423').collection('users').insertOne({
     "username": reqUsername,
     "password": reqPassword,
     "name": reqName,
     "email": reqEmail,
   });
-  return "account created";
+
+  return "Account created";
 }
+
+function isPasswordStrong(password) {
+  const minLength = 10;
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+
+  return password.length >= minLength && regex.test(password);
+}
+
 ///create visitor 
 function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime,reqTemperature,reqGender,reqEthnicity,reqAge,ReqPhonenumber, createdBy) {
   client.db('benr2423').collection('visitor').insertOne({
