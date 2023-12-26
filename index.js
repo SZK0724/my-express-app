@@ -30,6 +30,7 @@ const swaggerOptions = {
       5. To delete a visitor pass that you previously created, navigate to the "User" -> "/delete/visitor/{visitorname}" section and follow the instructions.
 
       6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "/view/visitor/user" section.
+      
 
       **Instructions for Visotor to Get Their Pass**:
 
