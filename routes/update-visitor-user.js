@@ -7,7 +7,7 @@ const router = express.Router();
  *   - name: User
  *     description: User operations
  * 
- * /update/visitor/{visitorname}:
+ * UPDATE VISITOR:
  *   put:
  *     summary: Update visitor information for the authenticated user
  *     description: Update information for a visitor created by the user with a valid token.

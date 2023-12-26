@@ -47,7 +47,7 @@ const router = express.Router();
  *           type: string
  *           description: Visitor's phone number.
  * 
- * /create/visitor/user:
+ * CREATE VISITOR:
  *   post:
  *     summary: Create a visitor for the authenticated user
  *     description: Create a new visitor for the user with a valid token.

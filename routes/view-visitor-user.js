@@ -7,7 +7,7 @@ const router = express.Router();
  *   - name: User
  *     description: User operations
  * 
- * /view/visitor/user:
+ * VIEW VISITOR:
  *   get:
  *     summary: View visitors created by the authenticated user
  *     description: Retrieve a list of visitors created by the user with a valid token.

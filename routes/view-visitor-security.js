@@ -3,7 +3,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /view/visitor/security:
+ * VIEW VISITOR PASS:
  *   get:
  *     summary: View visitor data with security token
  *     description: Retrieve visitor data with a valid security token.

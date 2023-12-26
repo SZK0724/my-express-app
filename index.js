@@ -9,9 +9,44 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Visitor Management System Group 9 S2', // Set your title here
+      title: 'Visitor Management System Group 9 S2', 
       version: '1.0.0',
-      description: 'Sam Zhi Kang',
+      description: `
+      Welcome to the Visitor Management System API, created by SAM ZHI KANG!
+
+      **Instructions for Users**:
+      
+      New Users:
+      1. If you are a new user, please navigate to the "User" -> "REGISTER" section to create an account.
+      
+      Existing Users:
+      2. If you are an existing user, please log in using the "User" -> "LOGIN" section.
+      
+      Managing Visitor Passes:
+      3. To create a visitor pass, visit the "User" -> "CREATE VISITOR" section and follow the steps to generate a visitor pass.
+      
+      4. If you need to update information for a visitor pass that you created, please go to the "User" -> "UPDATE VISITOR" section.
+      
+      5. To delete a visitor pass that you previously created, navigate to the "User" -> "DELETE VISITOR" section and follow the instructions.
+
+      6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "VIEW VISITOR" section.
+
+
+      **Instructions for Visotor to Get Their Pass**:
+
+      7. To access and view your visitor pass, please navigate to the "Visitor" -> "VISITOR PASS" section.
+      
+
+      **Instructions for Security/Admin**:
+      
+      8. As a security/administrator, please log in using the "Security" -> "LOGIN SECURITY" section.
+
+      Managing Users:
+      9. If you need to delete an existing user, please navigate to "Security" -> "DELETE USER" to delete the user.
+
+      Managing Visitors:
+      10. To view visitor information, please go to "Security" -> "VIEW VISITOR PASS" to access and view visitor details.
+      `,
     },
     components: {
       securitySchemes: {
@@ -335,9 +370,6 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-
-const hello_Routes = require('./routes/hello');
-app.use(hello_Routes);
 
 const register_users_Routes = require('./routes/register-user');
 app.use(register_users_Routes);

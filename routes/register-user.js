@@ -3,9 +3,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /register/user:
+ *  REGISTER:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user account
  *     description: Allows a new user to create an account.
  *     tags: [User]
  *     requestBody:

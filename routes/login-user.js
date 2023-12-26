@@ -22,7 +22,7 @@ const router = express.Router();
  *           type: string
  *           description: User's password.
  * 
- * /login/user:
+ * LOGIN:
  *   post:
  *     summary: User login
  *     description: Log in as a user and receive an authentication token.
