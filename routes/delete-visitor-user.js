@@ -7,7 +7,7 @@ const router = express.Router();
  *   - name: User
  *     description: User operations
  * 
- * DELETE VISITOR:
+ * /delete/visitor/{visitorname}:
  *   delete:
  *     summary: Delete a visitor for the authenticated user
  *     description: Delete a visitor for the user with a valid token.

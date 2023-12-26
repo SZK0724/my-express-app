@@ -17,35 +17,34 @@ const swaggerOptions = {
       **Instructions for Users**:
       
       New Users:
-      1. If you are a new user, please navigate to the "User" -> "REGISTER" section to create an account.
+      1. If you are a new user, please navigate to the "User" -> "/register/user" section to create an account.
       
       Existing Users:
-      2. If you are an existing user, please log in using the "User" -> "LOGIN" section.
+      2. If you are an existing user, please log in using the "User" -> "/login/user" section.
       
       Managing Visitor Passes:
-      3. To create a visitor pass, visit the "User" -> "CREATE VISITOR" section and follow the steps to generate a visitor pass.
+      3. To create a visitor pass, visit the "User" -> "/create/visitor/user" section and follow the steps to generate a visitor pass.
       
-      4. If you need to update information for a visitor pass that you created, please go to the "User" -> "UPDATE VISITOR" section.
+      4. If you need to update information for a visitor pass that you created, please go to the "User" -> "/update/visitor/{visitorname}" section.
       
-      5. To delete a visitor pass that you previously created, navigate to the "User" -> "DELETE VISITOR" section and follow the instructions.
+      5. To delete a visitor pass that you previously created, navigate to the "User" -> "/delete/visitor/{visitorname}" section and follow the instructions.
 
-      6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "VIEW VISITOR" section.
-
+      6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "/view/visitor/user" section.
 
       **Instructions for Visotor to Get Their Pass**:
 
-      7. To access and view your visitor pass, please navigate to the "Visitor" -> "VISITOR PASS" section.
+      7. To access and view your visitor pass, please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
       
 
       **Instructions for Security/Admin**:
       
-      8. As a security/administrator, please log in using the "Security" -> "LOGIN SECURITY" section.
+      8. As a security/administrator, please log in using the "Security" -> "/login/security" section.
 
       Managing Users:
-      9. If you need to delete an existing user, please navigate to "Security" -> "DELETE USER" to delete the user.
+      9. If you need to delete an existing user, please navigate to "Security" -> "/delete/user/{username}" to delete the user.
 
       Managing Visitors:
-      10. To view visitor information, please go to "Security" -> "VIEW VISITOR PASS" to access and view visitor details.
+      10. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
       `,
     },
     components: {
@@ -60,6 +59,7 @@ const swaggerOptions = {
   },
   apis: ['./routes/*.js'], // path to API docs
 };
+
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));

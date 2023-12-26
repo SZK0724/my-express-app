@@ -22,7 +22,7 @@ const router = express.Router();
  *           type: string
  *           description: Security personnel's password.
  * 
- * LOGIN SECURITY:
+ * /login/security:
  *   post:
  *     tags: [Security]
  *     summary: Security login

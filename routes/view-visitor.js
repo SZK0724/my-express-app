@@ -7,7 +7,7 @@ const router = express.Router();
  *   - name: Visitor
  *     description: Visitor operations
  * 
- * VISITOR PASS:
+ * /view/visitor/{visitorName}:
  *   get:
  *     summary: View details of a specific visitor
  *     description: Retrieve details of a visitor by providing the visitor's name.

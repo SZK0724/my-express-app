@@ -3,7 +3,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * DELETE USER:
+ * /delete/user/{username}:
  *   delete:
  *     summary: Delete a user account with security token
  *     description: Allows administrators to delete a user account.
