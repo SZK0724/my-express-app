@@ -8,7 +8,11 @@ const port = process.env.PORT || 3000;
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
-    // ... other options ...
+    info: {
+      title: 'Visitor Management System Group 9 S2', // Set your title here
+      version: '1.0.0',
+      description: 'Sam Zhi Kang',
+    },
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -300,7 +304,7 @@ function generateToken(userData) {
   const token = jwt.sign(
     userData,
     'mypassword',
-    { expiresIn: 60 }
+    { expiresIn: 300 }
   );
 
   console.log(token);
@@ -327,12 +331,10 @@ function verifyToken(req, res, next) {
   });
 }
 
-
-
-
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
 
 const hello_Routes = require('./routes/hello');
 app.use(hello_Routes);
