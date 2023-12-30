@@ -266,7 +266,16 @@ app.get('/view/visitor/:visitorName', async (req, res) => {
     const result = await client
       .db('benr2423')
       .collection('visitor')
-      .findOne({ visitorname: visitorName });
+      .findOne({ visitorname: visitorName }, {
+        projection: {
+          _id: 0, 
+          visitorname: 1,
+          checkintime: 1,
+          checkouttime: 1,
+          temperature: 1,
+          approval: 1
+        }
+      });
 
     if (result) {
       res.send(result);
