@@ -14,13 +14,14 @@ const swaggerOptions = {
       description: `
       Welcome to the Visitor Management System API, created by SAM ZHI KANG!
 
+      **Instructions for Login**:
+
+      1. If you are an security or existing user, please log in using the "Login" -> "/login" section.
+
       **Instructions for Users**:
       
       New Users:
-      1. If you are a new user, please navigate to the "User" -> "/register/user" section to create an account.
-      
-      Existing Users:
-      2. If you are an existing user, please log in using the "User" -> "/login/user" section.
+      2. If you are a new user, please navigate to the "User" -> "/register/user" section to create an account.
       
       Managing Visitor Passes:
       3. To create a visitor pass, visit the "User" -> "/create/visitor/user" section and follow the steps to generate a visitor pass.
@@ -38,16 +39,14 @@ const swaggerOptions = {
       
 
       **Instructions for Security/Admin**:
-      
-      8. As a security/administrator, please log in using the "Security" -> "/login/security" section.
 
       Managing Users:
-      9. If you need to delete an existing user, please navigate to "Security" -> "/delete/user/{username}" to delete the user.
+      8. If you need to delete an existing user, please navigate to "Security" -> "/delete/user/{username}" to delete the user.
 
       Managing Visitors:
-      10. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
+      9. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
 
-      11. To approve the visitor, please go to "Security" -> "/approve/visitor/{visitorname}" to approve the visitor status.
+      10. To approve the visitor, please go to "Security" -> "/approve/visitor/{visitorname}" to approve the visitor status.
       `,
     },
     components: {
@@ -87,10 +86,6 @@ client.connect().then(res => {
 });
 
 
-
-
-
-
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
@@ -101,19 +96,17 @@ app.post('/register/user', async (req, res) => {
     req.body.password,
     req.body.name,
     req.body.email,
+    req.body.role // 'user' or 'security'
   );
-
   res.send(result);
 });
 
-app.post('/login/security', (req, res) => {
-  console.log(req.body);
+app.post('/login', async (req, res) => {
   login(req.body.username, req.body.password)
-    .then(async result => { 
+    .then(result => {
       if (result.message === 'Correct password') {
-        const usersData = await client.db('benr2423').collection('users').find().toArray(); // Added await
-        const token = generateToken({ username: req.body.username });
-        res.send({ message: 'Successful login', token, usersData }); // Combined into one object
+        const token = generateToken({ username: req.body.username, role: result.user.role });
+        res.send({ message: 'Successful login', token });
       } else {
         res.send('Login unsuccessful');
       }
@@ -124,8 +117,7 @@ app.post('/login/security', (req, res) => {
     });
 });
 
-
-app.get('/view/visitor/security', verifyToken, async (req, res) => {
+app.get('/view/visitor/security', verifyToken, verifyRole('security'), async (req, res) => {
   try {
     const result = await client
       .db('benr2423')
@@ -140,7 +132,8 @@ app.get('/view/visitor/security', verifyToken, async (req, res) => {
   }
 });
 
-app.delete('/delete/user/:username', verifyToken, async (req, res) => {
+////
+app.delete('/delete/user/:username', verifyToken, verifyRole('security'), async (req, res) => {
   const username = req.params.username;
 
   try {
@@ -154,12 +147,6 @@ app.delete('/delete/user/:username', verifyToken, async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    // Delete the user's documents
-    const deleteDocumentsResult = await client
-      .db('benr2423')
-      .collection('documents')
-      .deleteMany({ username });
-
     // Delete the visitors created by the user
     const deleteVisitorsResult = await client
       .db('benr2423')
@@ -172,25 +159,9 @@ app.delete('/delete/user/:username', verifyToken, async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+////
 
-app.post('/login/user', (req, res) => {
-  console.log(req.body);
-  loginuser(req.body.username, req.body.password)
-    .then(result => {
-      if (result.message === 'Correct password') {
-        const token = generateToken({ username: req.body.username });
-        res.send({ message: 'Successful login', token });
-      } else {
-        res.send('Login unsuccessful');
-      }
-    })
-    .catch(error => {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    });
-});
-
-app.post('/create/visitor/user', verifyToken, async (req, res) => {
+app.post('/create/visitor/user', verifyToken, verifyRole('user'),  async (req, res) => {
   const createdBy = req.user.username; // Get the username from the decoded token
   let result = createvisitor(
     req.body.visitorname,
@@ -206,7 +177,7 @@ app.post('/create/visitor/user', verifyToken, async (req, res) => {
   res.send(result);
 });
 
-app.get('/view/visitor/user', verifyToken, async (req, res) => {
+app.get('/view/visitor/user', verifyToken, verifyRole('user'), async (req, res) => {
   try {
     const username = req.user.username; // Get the username from the decoded token
     const result = await client
@@ -222,7 +193,7 @@ app.get('/view/visitor/user', verifyToken, async (req, res) => {
   }
 });
 
-app.delete('/delete/visitor/:visitorname', verifyToken, async (req, res) => {
+app.delete('/delete/visitor/:visitorname', verifyToken, verifyRole('user'), async (req, res) => {
   const visitorname = req.params.visitorname;
   const username = req.user.username; // Assuming the username is available in the req.user object
 
@@ -244,7 +215,7 @@ app.delete('/delete/visitor/:visitorname', verifyToken, async (req, res) => {
   }
 });
 
-app.put('/update/visitor/:visitorname', verifyToken, async (req, res) => {
+app.put('/update/visitor/:visitorname', verifyToken, verifyRole('user'), async (req, res) => {
   const visitorname = req.params.visitorname;
   const username = req.user.username;
   const { checkintime, checkouttime,temperature,gender,ethnicity,age,phonenumber } = req.body;
@@ -290,7 +261,7 @@ app.get('/view/visitor/:visitorName', async (req, res) => {
 });
 
 //update status approval visitor by security 
-app.put('/approve/visitor/:visitorname', verifyToken, async (req, res) => {
+app.put('/approve/visitor/:visitorname', verifyToken, verifyRole('security'), async (req, res) => {
   const visitorname = req.params.visitorname;
   const securityname = req.user.username; // Assuming the username of the security personnel is in the req.user object
 
@@ -315,46 +286,37 @@ app.put('/approve/visitor/:visitorname', verifyToken, async (req, res) => {
 });
 
 
-async function login(reqUsername, reqPassword) {
-  let matchUser = await client.db('benr2423').collection('security').findOne({ username: { $eq: reqUsername } });
-
-  if (!matchUser)
-    return { message: "User not found!" };
-
-  if (matchUser.password === reqPassword)
-    return { message: "Correct password", user: matchUser };
-  else
-    return { message: "Invalid password" };
+async function login(username, password) {
+  let matchUser = await client.db('benr2423').collection('users').findOne({ username: username });
+  if (!matchUser) return { message: "User not found!" };
+  if (matchUser.password === password) return { message: "Correct password", user: matchUser };
+  else return { message: "Invalid password" };
 }
 
-async function loginuser(reqUsername, reqPassword) {
-  let matchUser = await client.db('benr2423').collection('users').findOne({ username: { $eq: reqUsername } });
 
-  if (!matchUser)
-    return { message: "User not found!" };
-
-  if (matchUser.password === reqPassword)
-    return { message: "Correct password", user: matchUser };
-  else
-    return { message: "Invalid password" };
-}
-
-function validateAndRegister(reqUsername, reqPassword, reqName, reqEmail) {
-  // Check if the password is strong
-  if (!isPasswordStrong(reqPassword)) {
-    return "Weak password. Password must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols.";
+function validateAndRegister(username, password, name, email, role = 'user') {
+  if (!isPasswordStrong(password)) {
+    return "Weak passwordPassword must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols";
   }
-
-  // If the password is strong, proceed to register the user
   client.db('benr2423').collection('users').insertOne({
-    "username": reqUsername,
-    "password": reqPassword,
-    "name": reqName,
-    "email": reqEmail,
+    username,
+    password,
+    name,
+    email,
+    role // save the role
   });
-
   return "Account created";
 }
+
+function verifyRole(role) {
+  return function(req, res, next) {
+    if (req.user.role !== role) {
+      return res.status(403).send('Access Denied');
+    }
+    next();
+  };
+}
+
 
 function isPasswordStrong(password) {
   const minLength = 10;
@@ -382,15 +344,8 @@ function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTempe
 
 const jwt = require('jsonwebtoken');
 
-function generateToken(userData) {
-  const token = jwt.sign(
-    userData,
-    'mypassword',
-    { expiresIn: 300 }
-  );
-
-  console.log(token);
-  return token;
+function generateToken({ username, role }) {
+  return jwt.sign({ username, role }, 'mypassword', { expiresIn: 300 });
 }
 
 
@@ -421,17 +376,14 @@ app.listen(port, () => {
 const register_users_Routes = require('./routes/register-user');
 app.use(register_users_Routes);
 
-const login_security_Routes = require('./routes/login-security');
-app.use(login_security_Routes);
+const login_user_Routes = require('./routes/login-user');
+app.use(login_user_Routes);
 
 const view_visitor_securityRoutes = require('./routes/view-visitor-security');
 app.use(view_visitor_securityRoutes);
 
 const delete_user_securityRoutes = require('./routes/delete-user-security');
 app.use(delete_user_securityRoutes);
-
-const login_user_Routes = require('./routes/login-user');
-app.use(login_user_Routes);
 
 const create_visitor_user_Routes = require('./routes/create-visitor-user');
 app.use(create_visitor_user_Routes);

@@ -4,8 +4,8 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   - name: User
- *     description: User operations
+ *   - name: Login
+ *     description: Operations for both regular users and security personnel
  * 
  * components:
  *   schemas:
@@ -17,16 +17,18 @@ const router = express.Router();
  *       properties:
  *         username:
  *           type: string
- *           description: User's username.
+ *           description: Username of the user or security personnel.
  *         password:
  *           type: string
- *           description: User's password.
+ *           description: Password of the user or security personnel.
  * 
- * /login/user:
+ * /login:
  *   post:
  *     summary: User login
- *     description: Log in as a user and receive an authentication token.
- *     tags: [User]
+ *     description: >
+ *       Log in as a user or security personnel and receive an authentication token. 
+ *       This endpoint is used by both regular users and security personnel for authentication.
+ *     tags: [Login]
  *     requestBody:
  *       required: true
  *       content:
@@ -42,10 +44,11 @@ const router = express.Router();
  *               message: Successful login
  *               token: generatedTokenString
  *       401:
- *         description: Login unsuccessful.
+ *         description: Login unsuccessful due to invalid credentials or unauthorized access.
  *       500:
  *         description: Internal Server Error. Failed to process the login.
  */
+
 
 
 
