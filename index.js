@@ -91,22 +91,40 @@ app.get('/', (req, res) => {
 });
 
 app.post('/register/user', async (req, res) => {
-  let result = validateAndRegister(
-    req.body.username,
-    req.body.password,
-    req.body.name,
-    req.body.email,
-    req.body.role // 'user' or 'security'
-  );
-  res.send(result);
+  try {
+    let result = await validateAndRegister(
+      req.body.username,
+      req.body.password,
+      req.body.name,
+      req.body.email,
+      req.body.role // 'user' or 'security'
+    );
+
+    if (result.status === 'error') {
+      res.status(400).send(result.message); // Send a 400 Bad Request if there's an error
+    } else {
+      res.send(result.message); // Success message
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
+///
 app.post('/login', async (req, res) => {
   login(req.body.username, req.body.password)
-    .then(result => {
+    .then(async result => {
       if (result.message === 'Correct password') {
         const token = generateToken({ username: req.body.username, role: result.user.role });
-        res.send({ message: 'Successful login', token });
+
+        // Check if the role is 'security' and fetch data of all users with role 'user'
+        let userData = [];
+        if (result.user.role === 'security') {
+          userData = await client.db('benr2423').collection('users').find({ role: 'user' }).toArray();
+        }
+
+        res.send({ message: 'Successful login', token, userData });
       } else {
         res.send('Login unsuccessful');
       }
@@ -117,6 +135,7 @@ app.post('/login', async (req, res) => {
     });
 });
 
+///
 app.get('/view/visitor/security', verifyToken, verifyRole('security'), async (req, res) => {
   try {
     const result = await client
@@ -161,9 +180,9 @@ app.delete('/delete/user/:username', verifyToken, verifyRole('security'), async 
 });
 ////
 
-app.post('/create/visitor/user', verifyToken, verifyRole('user'),  async (req, res) => {
+app.post('/create/visitor/user', verifyToken, verifyRole('user'), async (req, res) => {
   const createdBy = req.user.username; // Get the username from the decoded token
-  let result = createvisitor(
+  const result = await createvisitor(
     req.body.visitorname,
     req.body.checkintime,
     req.body.checkouttime,
@@ -173,7 +192,7 @@ app.post('/create/visitor/user', verifyToken, verifyRole('user'),  async (req, r
     req.body.age,
     req.body.phonenumber,
     createdBy
-  );   
+  );
   res.send(result);
 });
 
@@ -294,18 +313,29 @@ async function login(username, password) {
 }
 
 
-function validateAndRegister(username, password, name, email, role = 'user') {
+
+async function validateAndRegister(username, password, name, email, role = 'user') {
+  // Check if the password is strong
   if (!isPasswordStrong(password)) {
-    return "Weak passwordPassword must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols";
+    return { status: 'error', message: "Weak password. Password must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols." };
   }
-  client.db('benr2423').collection('users').insertOne({
+
+  // Check if the username already exists
+  const existingUser = await client.db('benr2423').collection('users').findOne({ username: username });
+  if (existingUser) {
+    return { status: 'error', message: "Username already exists. Please try a different username." };
+  }
+
+  // If username doesn't exist, create the new user
+  await client.db('benr2423').collection('users').insertOne({
     username,
     password,
     name,
     email,
     role // save the role
   });
-  return "Account created";
+
+  return { status: 'success', message: "Account created successfully." };
 }
 
 function verifyRole(role) {
@@ -326,8 +356,14 @@ function isPasswordStrong(password) {
 }
 
 ///create visitor 
-function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTemperature, reqGender, reqEthnicity, reqAge, ReqPhonenumber, createdBy) {
-  client.db('benr2423').collection('visitor').insertOne({
+async function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTemperature, reqGender, reqEthnicity, reqAge, ReqPhonenumber, createdBy) {
+  const existingVisitor = await client.db('benr2423').collection('visitor').findOne({ "visitorname": reqVisitorname });
+  
+  if (existingVisitor) {
+    return { message: "Visitor name already exists, please use a different name." };
+  }
+
+  await client.db('benr2423').collection('visitor').insertOne({
     "visitorname": reqVisitorname,
     "checkintime": reqCheckintime,
     "checkouttime": reqCheckouttime,
@@ -337,9 +373,10 @@ function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTempe
     "age": reqAge,
     "phonenumber": ReqPhonenumber,
     "createdBy": createdBy,
-    "approval": "none" // Default approval status
+    "approval": "none"
   });
-  return "visitor created";
+
+  return { message: "visitor created" };
 }
 
 const jwt = require('jsonwebtoken');
