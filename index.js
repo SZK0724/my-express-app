@@ -109,10 +109,11 @@ app.post('/register/user', async (req, res) => {
 app.post('/login/security', (req, res) => {
   console.log(req.body);
   login(req.body.username, req.body.password)
-    .then(result => {
+    .then(async result => { 
       if (result.message === 'Correct password') {
+        const usersData = await client.db('benr2423').collection('users').find().toArray(); // Added await
         const token = generateToken({ username: req.body.username });
-        res.send({ message: 'Successful login', token });
+        res.send({ message: 'Successful login', token, usersData }); // Combined into one object
       } else {
         res.send('Login unsuccessful');
       }
@@ -122,6 +123,7 @@ app.post('/login/security', (req, res) => {
       res.status(500).send("Internal Server Error");
     });
 });
+
 
 app.get('/view/visitor/security', verifyToken, async (req, res) => {
   try {
@@ -287,6 +289,31 @@ app.get('/view/visitor/:visitorName', async (req, res) => {
   }
 });
 
+//update status approval visitor by security 
+app.put('/approve/visitor/:visitorname', verifyToken, async (req, res) => {
+  const visitorname = req.params.visitorname;
+  const securityname = req.user.username; // Assuming the username of the security personnel is in the req.user object
+
+  try {
+    const updateVisitorResult = await client
+      .db('benr2423')
+      .collection('visitor')
+      .updateOne(
+        { visitorname },
+        { $set: { approval: "approved", approvedBy: securityname } } // Update approval status and record who approved it
+      );
+
+    if (updateVisitorResult.modifiedCount === 0) {
+      return res.status(404).send('Visitor not found or unauthorized');
+    }
+
+    res.send('Visitor approved successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 async function login(reqUsername, reqPassword) {
   let matchUser = await client.db('benr2423').collection('security').findOne({ username: { $eq: reqUsername } });
@@ -352,33 +379,6 @@ function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTempe
   });
   return "visitor created";
 }
-
-//update status approval visitor by security 
-app.put('/approve/visitor/:visitorname', verifyToken, async (req, res) => {
-  const visitorname = req.params.visitorname;
-  const securityname = req.user.username; // Assuming the username of the security personnel is in the req.user object
-
-  try {
-    const updateVisitorResult = await client
-      .db('benr2423')
-      .collection('visitor')
-      .updateOne(
-        { visitorname },
-        { $set: { approval: "approved", approvedBy: securityname } } // Update approval status and record who approved it
-      );
-
-    if (updateVisitorResult.modifiedCount === 0) {
-      return res.status(404).send('Visitor not found or unauthorized');
-    }
-
-    res.send('Visitor approved successfully');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-
 
 const jwt = require('jsonwebtoken');
 

@@ -26,7 +26,7 @@ const router = express.Router();
  *   post:
  *     tags: [Security]
  *     summary: Security login
- *     description: This endpoint allows security personnel to log in.
+ *     description: This endpoint allows security personnel to log in and returns all users data upon successful login.
  *     requestBody:
  *       required: true
  *       content:
@@ -35,7 +35,7 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Login'
  *     responses:
  *       200:
- *         description: Successful login with token returned.
+ *         description: Successful login with token and users data returned.
  *       401:
  *         description: Unauthorized access.
  */
