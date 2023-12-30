@@ -34,7 +34,7 @@ const swaggerOptions = {
 
       **Instructions for Visitor to Get Their Pass**:
 
-      7. To access and view your visitor pass, please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
+      7. To access and view your visitor pass (approved/ none), please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
       
 
       **Instructions for Security/Admin**:
@@ -46,6 +46,8 @@ const swaggerOptions = {
 
       Managing Visitors:
       10. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
+
+      11. To approve the visitor, please go to "Security" -> "/approve/visitor/{visitorname}" to approve the visitor status.
       `,
     },
     components: {
@@ -83,6 +85,9 @@ const client = new MongoClient(uri, {
 client.connect().then(res => {
   console.log(res);
 });
+
+
+
 
 
 
@@ -332,20 +337,47 @@ function isPasswordStrong(password) {
 }
 
 ///create visitor 
-function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime,reqTemperature,reqGender,reqEthnicity,reqAge,ReqPhonenumber, createdBy) {
+function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, reqTemperature, reqGender, reqEthnicity, reqAge, ReqPhonenumber, createdBy) {
   client.db('benr2423').collection('visitor').insertOne({
     "visitorname": reqVisitorname,
     "checkintime": reqCheckintime,
     "checkouttime": reqCheckouttime,
-    "temperature":reqTemperature,
-    "gender":reqGender,
-    "ethnicity":reqEthnicity,
-    "age":reqAge,
-    "phonenumber":ReqPhonenumber,
-    "createdBy": createdBy // Add the createdBy field with the username
+    "temperature": reqTemperature,
+    "gender": reqGender,
+    "ethnicity": reqEthnicity,
+    "age": reqAge,
+    "phonenumber": ReqPhonenumber,
+    "createdBy": createdBy,
+    "approval": "none" // Default approval status
   });
   return "visitor created";
 }
+
+//update status approval visitor by security 
+app.put('/approve/visitor/:visitorname', verifyToken, async (req, res) => {
+  const visitorname = req.params.visitorname;
+  const securityname = req.user.username; // Assuming the username of the security personnel is in the req.user object
+
+  try {
+    const updateVisitorResult = await client
+      .db('benr2423')
+      .collection('visitor')
+      .updateOne(
+        { visitorname },
+        { $set: { approval: "approved", approvedBy: securityname } } // Update approval status and record who approved it
+      );
+
+    if (updateVisitorResult.modifiedCount === 0) {
+      return res.status(404).send('Visitor not found or unauthorized');
+    }
+
+    res.send('Visitor approved successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 
 const jwt = require('jsonwebtoken');
@@ -415,3 +447,6 @@ app.use(update_visitor_user_Routes);
 
 const view_visitor_Routes = require('./routes/view-visitor');
 app.use(view_visitor_Routes);
+
+const approve_visitor_security_Routes = require('./routes/approve-visitor-security');
+app.use(approve_visitor_security_Routes);
