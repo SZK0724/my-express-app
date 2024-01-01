@@ -69,7 +69,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(express.json());
 
 
-
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/";
 
@@ -359,7 +358,7 @@ function verifyRole(role) {
 
 function isPasswordStrong(password) {
   const minLength = 10;
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^.()])[A-Za-z\d@$!%*?&^.()]{10,}$/;
 
   return password.length >= minLength && regex.test(password);
 }
