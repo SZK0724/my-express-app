@@ -18,35 +18,39 @@ const swaggerOptions = {
 
       1. If you are an security or existing user, please log in using the "Login" -> "/login" section.
 
-      **Instructions for Users**:
-      
-      New Users:
-      2. If you are a new user, please navigate to the "User" -> "/register/user" section to create an account.
-      
-      Managing Visitor Passes:
-      3. To create a visitor pass, visit the "User" -> "/create/visitor/user" section and follow the steps to generate a visitor pass.
-      
-      4. If you need to update information for a visitor pass that you created, please go to the "User" -> "/update/visitor/{visitorname}" section.
-      
-      5. To delete a visitor pass that you previously created, navigate to the "User" -> "/delete/visitor/{visitorname}" section and follow the instructions.
-
-      6. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "/view/visitor/user" section.
-
-
-      **Instructions for Visitor to Get Their Pass**:
-
-      7. To access and view your visitor pass (approved/ none), please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
-      
 
       **Instructions for Security/Admin**:
 
       Managing Users:
-      8. If you need to delete an existing user, please navigate to "Security" -> "/delete/user/{username}" to delete the user.
+      2. To create a new user account, please navigate to the "Security" -> "/register/user" section to create an account.
+
+      3. If you need to delete an existing user, please navigate to "Security" -> "/delete/user/{username}" to delete the user.
 
       Managing Visitors:
-      9. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
+      4. To view visitor information, please go to "Security" -> "/view/visitor/security" to access and view visitor details.
 
-      10. To approve the visitor, please go to "Security" -> "/approve/visitor/{visitorname}" to approve the visitor status.
+      5. To approve the visitor, please go to "Security" -> "/approve/visitor/{visitorname}" to approve the visitor status.
+
+
+      **Instructions for Users**:
+
+      Testing Account
+      6. User can create testing account for testing purpose, please go to the "Test Accounts" -> "/register/test/user" section.
+      
+      Managing Visitor Passes:
+      7. To create a visitor pass, visit the "User" -> "/create/visitor/user" section and follow the steps to generate a visitor pass.
+      
+      8. If you need to update information for a visitor pass that you created, please go to the "User" -> "/update/visitor/{visitorname}" section.
+      
+      9. To delete a visitor pass that you previously created, navigate to the "User" -> "/delete/visitor/{visitorname}" section and follow the instructions.
+
+      10. If you need to view information for a visitor pass that you created, please navigate to the "User" -> "/view/visitor/user" section.
+
+
+      **Instructions for Visitor to Get Their Pass**:
+
+      11. To access and view your visitor pass (approved/ none), please navigate to the "Visitor" -> "/view/visitor/{visitorName}" section.
+      
       `,
     },
     components: {
@@ -89,14 +93,37 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.post('/register/user', async (req, res) => {
+// This route handler allows anyone to create an account for testing purposes.
+app.post('/register/test/user', async (req, res) => {
+  // Extract user details from request body
+  const { username, password, name, email } = req.body;
+
+  // Here you would call a function to insert the user into the database, marking the account as inactive or for testing
+  const result = await createTestUser(username, password, name, email);
+
+  res.status(result.status).send(result.message);
+});
+
+// This function simulates inserting the user into the database as a test account
+async function createTestUser(username, password, name, email) {
+  // Implement the logic to insert user into the database
+  // For now, just return a success message
+  return {
+    status: 200, // Or appropriate status code
+    message: "Test account created successfully."
+  };
+}
+
+
+app.post('/register/user', verifyToken, verifyRole('security'), async (req, res) => {
   try {
     let result = await validateAndRegister(
       req.body.username,
       req.body.password,
       req.body.name,
       req.body.email,
-      req.body.role // 'user' or 'security'
+      req.body.role, // 'user' or 'security'
+      req.user.username // the username of the 'security' user creating the account
     );
 
     if (result.status === 'error') {
@@ -109,7 +136,6 @@ app.post('/register/user', async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
 ///
 app.post('/login', async (req, res) => {
   login(req.body.username, req.body.password)
@@ -322,7 +348,7 @@ async function login(username, password) {
 
 
 
-async function validateAndRegister(username, password, name, email, role = 'user') {
+async function validateAndRegister(username, password, name, email, role = 'user',createdBy) {
   // Check if the password is strong
   if (!isPasswordStrong(password)) {
     return { status: 'error', message: "Weak password. Password must be more than 10 characters and include uppercase and lowercase letters, numbers, and symbols." };
@@ -340,7 +366,8 @@ async function validateAndRegister(username, password, name, email, role = 'user
     password,
     name,
     email,
-    role // save the role
+    role, // save the role
+    createdBy // save the username of the 'security' user who created this account
   });
 
   return { status: 'success', message: "Account created successfully." };
@@ -417,7 +444,6 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
-
 const register_users_Routes = require('./routes/register-user');
 app.use(register_users_Routes);
 
@@ -447,3 +473,6 @@ app.use(view_visitor_Routes);
 
 const approve_visitor_security_Routes = require('./routes/approve-visitor-security');
 app.use(approve_visitor_security_Routes);
+
+const register_testusers_Routes = require('./routes/register-testuser');
+app.use(register_testusers_Routes);

@@ -3,13 +3,11 @@ const router = express.Router();
 
 /**
  * @swagger
- * /register/user:
+ * /register/test/user:
  *   post:
- *     security:
- *       - bearerAuth: []
- *     summary: Register a new user account
- *     description: Allows an authentic security to create a new user account.
- *     tags: [Security]
+ *     summary: Register a new test user account
+ *     description: Allows anyone to create a new test user account. These accounts are inactive and for testing purposes only. Test account cannot perform any operation.
+ *     tags: [Test Accounts]
  *     requestBody:
  *       required: true
  *       content:
@@ -32,17 +30,15 @@ const router = express.Router();
  *                 type: string
  *     responses:
  *       200:
- *         description: Account created successfully.
+ *         description: Test account created successfully.
  *       400:
- *         description: Bad request.
- *       401:
- *         description: Unauthorized. Only security can create accounts.
- *       403:
- *         description: Forbidden. Only security can create accounts.
+ *         description: Bad request. Required fields are missing.
  */
 
- router.get('/register/user', (req, res) => {
-    res.send('/register/user');
+
+
+ router.get('/register/test/user', (req, res) => {
+    res.send('/register/test/user');
   });
   
   module.exports = router;
