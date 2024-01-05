@@ -24,7 +24,7 @@ const router = express.Router();
  * 
  * /login:
  *   post:
- *     summary: User login
+ *     summary: User/Security login
  *     description: >
  *       Log in as a user or security personnel and receive an authentication token. 
  *       This endpoint is used by both regular users and security personnel for authentication.
