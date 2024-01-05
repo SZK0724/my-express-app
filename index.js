@@ -1,7 +1,10 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
-
+//
+const { MongoClient, ServerApiVersion } = require('mongodb');
+let client; // Declare client here
+//
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -71,22 +74,50 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(express.json());
+///
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://zhikangsam0724:2Un24f6Hfk4l1Z1x@cluster0.1jh2xph.mongodb.net/";
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+
+const { BlobServiceClient } = require('@azure/storage-blob');
+
+// Azure Blob Storage Configuration
+const azureConnectionString = "DefaultEndpointsProtocol=https;AccountName=sam0724;AccountKey=b///vGHmGZp8Soagz/UsgQyeFtUdxPRykr4R9Mt2TutDRcCU4MxDdz/p3CjGXIctCVVz9vi3a9T1+ASt9oRKTQ==;EndpointSuffix=core.windows.net";
+const containerName = "cert";
+const blobName = "X509-cert-3687050585495095085.pem";
+const localPemFilePath = "C:\\Users\\PC\\Desktop\\BENR 3433 Information Security\\assignment\\certs\\X509-cert-3687050585495095085.pem";
+
+
+// Function to download .pem file from Azure Blob Storage
+async function downloadPemFile() {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(azureConnectionString);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const blobClient = containerClient.getBlobClient(blobName);
+    await blobClient.downloadToFile(localPemFilePath);
+    console.log(`Downloaded ${blobName} to ${localPemFilePath}`);
+}
+
+// Download the PEM file and then initiate MongoDB connection
+downloadPemFile().then(() => {
+  client = new MongoClient('mongodb+srv://cluster0.1jh2xph.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
+    tlsCertificateKeyFile: localPemFilePath,
+    serverApi: ServerApiVersion.v1
+  });
+
+  async function run() {
+    try {
+      await client.connect();
+      console.log("Connected successfully to MongoDB");
+      app.locals.db = client.db("testDB");
+    } catch (error) {
+      console.error("Could not connect to MongoDB", error);
+      process.exit(1);
+    }
   }
-});
 
-client.connect().then(res => {
-  console.log(res);
-});
+  run().catch(console.dir);
 
+
+}).catch(console.error);
 
 
 
