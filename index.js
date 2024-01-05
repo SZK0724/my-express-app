@@ -89,18 +89,20 @@ const localPemFilePath = path.join(__dirname, 'certs', 'X509-cert-36870505854950
 
 // Function to download .pem file from Azure Blob Storage
 async function downloadPemFile() {
-    const blobServiceClient = BlobServiceClient.fromConnectionString(azureConnectionString);
-    const containerClient = blobServiceClient.getContainerClient(containerName);
-    const blobClient = containerClient.getBlobClient(blobName);
-    await blobClient.downloadToFile(localPemFilePath);
-    console.log(`Downloaded ${blobName} to ${localPemFilePath}`);
+  const blobServiceClient = BlobServiceClient.fromConnectionString(azureConnectionString);
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  const blobClient = containerClient.getBlobClient(blobName);
+  const downloadPath = path.join(__dirname, 'certs', blobName);
+  await blobClient.downloadToFile(downloadPath);
+  console.log(`Downloaded ${blobName} to ${downloadPath}`);
+  return downloadPath; // Return the path where the file was downloaded
 }
 
 // Download the PEM file and then initiate MongoDB connection
-downloadPemFile().then(() => {
+downloadPemFile().then((downloadPath) => {
   client = new MongoClient('mongodb+srv://cluster0.1jh2xph.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
-    tlsCertificateKeyFile: localPemFilePath,
-    serverApi: ServerApiVersion.v1
+      tlsCertificateKeyFile: downloadPath, // Use the downloaded path
+      serverApi: ServerApiVersion.v1
   });
 
   async function run() {
