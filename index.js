@@ -76,7 +76,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(express.json());
 ///
 
-
+const path = require('path');
 
 const { BlobServiceClient } = require('@azure/storage-blob');
 
@@ -84,7 +84,7 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const azureConnectionString = "DefaultEndpointsProtocol=https;AccountName=sam0724;AccountKey=b///vGHmGZp8Soagz/UsgQyeFtUdxPRykr4R9Mt2TutDRcCU4MxDdz/p3CjGXIctCVVz9vi3a9T1+ASt9oRKTQ==;EndpointSuffix=core.windows.net";
 const containerName = "cert";
 const blobName = "X509-cert-3687050585495095085.pem";
-const localPemFilePath = "C:\\Users\\PC\\Desktop\\BENR 3433 Information Security\\assignment\\certs\\X509-cert-3687050585495095085.pem";
+const localPemFilePath = path.join(__dirname, 'certs', 'X509-cert-3687050585495095085.pem');
 
 
 // Function to download .pem file from Azure Blob Storage
