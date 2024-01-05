@@ -9,8 +9,8 @@ const router = express.Router();
  * 
  * /view/visitor/{visitorName}:
  *   get:
- *     summary: View details of a specific visitor
- *     description: Retrieve details of a visitor by providing the visitor's name.
+ *     summary: Retrive visitor's PASS
+ *     description: Retrieve visitor pass by providing the visitor's name.
  *     tags: [Visitor]
  *     parameters:
  *       - in: path
@@ -21,7 +21,7 @@ const router = express.Router();
  *           type: string
  *     responses:
  *       200:
- *         description: Successfully retrieved visitor details.
+ *         description: Successfully retrieved visitor pass details.
  *         content:
  *           application/json:
  *             example:
@@ -29,7 +29,7 @@ const router = express.Router();
  *       404:
  *         description: Visitor not found.
  *       500:
- *         description: Internal Server Error. Failed to retrieve visitor details.
+ *         description: Internal Server Error. Failed to retrieve visitor pass details.
  */
 
  router.get('/view/visitor/:visitorName', (req, res) => {
