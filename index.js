@@ -1,8 +1,10 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
-
-
+//
+const { MongoClient, ServerApiVersion } = require('mongodb');
+let client; // Declare client here
+//
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -75,8 +77,7 @@ app.use(express.json());
 ///
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-let client; // Declare client here
+
 const { BlobServiceClient } = require('@azure/storage-blob');
 
 // Azure Blob Storage Configuration
@@ -100,24 +101,23 @@ downloadPemFile().then(() => {
   client = new MongoClient('mongodb+srv://cluster0.1jh2xph.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
     tlsCertificateKeyFile: localPemFilePath,
     serverApi: ServerApiVersion.v1
-});
+  });
 
-    async function run() {
-        try {
-            await client.connect();
-            console.log("Connected successfully to MongoDB");
-            app.locals.db = client.db("testDB");
-        } catch (error) {
-            console.error("Could not connect to MongoDB", error);
-            process.exit(1);
-        }
+  async function run() {
+    try {
+      await client.connect();
+      console.log("Connected successfully to MongoDB");
+      app.locals.db = client.db("testDB");
+    } catch (error) {
+      console.error("Could not connect to MongoDB", error);
+      process.exit(1);
     }
+  }
 
-    run().catch(console.dir);
+  run().catch(console.dir);
 
-    // ... (rest of your Express app setup)
+  // ... (rest of your Express app setup)
 }).catch(console.error);
-
 
 
 
