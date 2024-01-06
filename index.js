@@ -77,7 +77,7 @@ app.use(express.json());
 ///
 
 const path = require('path');
-
+// to handle file paths and interact with Azure Blob Storage
 const { BlobServiceClient } = require('@azure/storage-blob');
 
 // Azure Blob Storage Configuration
@@ -85,6 +85,7 @@ const azureConnectionString = "DefaultEndpointsProtocol=https;AccountName=sam072
 const containerName = "cert";
 const blobName = "X509-cert-3687050585495095085.pem";
 const localPemFilePath = path.join(__dirname, 'certs', 'X509-cert-3687050585495095085.pem');
+// PEM certificate file will be stored after downloading it from Azure Blob Storage to local path
 
 
 // Function to download .pem file from Azure Blob Storage
