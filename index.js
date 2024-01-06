@@ -2,6 +2,9 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 //
+const bcrypt = require('bcrypt');
+//
+//
 const { MongoClient, ServerApiVersion } = require('mongodb');
 let client; // Declare client here
 //
@@ -152,9 +155,11 @@ async function createTestUser(username, password, name, email) {
 //Security register user account
 app.post('/register/user', verifyToken, verifyRole('security'), async (req, res) => {
   try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10); // Hash the password
+
     let result = await validateAndRegister(
       req.body.username,
-      req.body.password,
+      hashedPassword, // Store the hashed password in the database
       req.body.name,
       req.body.email,
       req.body.role, // 'user' or 'security'
@@ -379,10 +384,15 @@ app.put('/approve/visitor/:visitorname', verifyToken, verifyRole('security'), as
 async function login(username, password) {
   let matchUser = await client.db('benr2423').collection('users').findOne({ username: username });
   if (!matchUser) return { message: "User not found!" };
-  if (matchUser.password === password) return { message: "Correct password", user: matchUser };
-  else return { message: "Invalid password" };
-}
 
+  // Compare the hashed password
+  const passwordMatch = await bcrypt.compare(password, matchUser.password);
+  if (passwordMatch) {
+    return { message: "Correct password", user: matchUser };
+  } else {
+    return { message: "Invalid password" };
+  }
+}
 
 
 async function validateAndRegister(username, password, name, email, role = 'user',createdBy) {
@@ -409,6 +419,8 @@ async function validateAndRegister(username, password, name, email, role = 'user
 
   return { status: 'success', message: "Account created successfully." };
 }
+
+
 
 function verifyRole(role) {
   return function(req, res, next) {
@@ -450,6 +462,11 @@ async function createvisitor(reqVisitorname, reqCheckintime, reqCheckouttime, re
 
   return { message: "visitor created" };
 }
+
+//
+
+//
+
 
 const jwt = require('jsonwebtoken');
 
