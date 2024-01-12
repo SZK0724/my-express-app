@@ -126,6 +126,12 @@ downloadPemFile().then((downloadPath) => {
 
 }).catch(console.error);
 
+const ipAccessControl = require('express-ip-access-control'); // Import the middleware
+
+const allowedIPs = ['65.52.163.40', '207.46.150.78','207.46.144.65','137.116.164.170','23.97.74.193','23.97.75.70','13.75.34.176']; // Add azure trusted IP addresses
+
+// Use the middleware directly
+app.use(ipAccessControl(allowedIPs, { mode: 'allow' }));
 
 
 app.get('/', (req, res) => {
