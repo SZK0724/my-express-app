@@ -1,10 +1,11 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
-//
+
 const bcrypt = require('bcrypt');
-//
-//
+const rateLimit = require('express-rate-limit');
+
+
 const { MongoClient, ServerApiVersion } = require('mongodb');
 let client; // Declare client here
 //
@@ -131,6 +132,14 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+// Define the rate limiting options
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit to 5 login attempts within the window
+  message: 'Too many login attempts from this IP, please try again later after 15 minit.',
+});
+
+
 //allows anyone to create an account for testing purposes.
 app.post('/register/test/user', async (req, res) => {
  // Extract user details from request body
@@ -177,29 +186,32 @@ app.post('/register/user', verifyToken, verifyRole('security'), async (req, res)
   }
 });
 
-//Login for security or user 
-app.post('/login', async (req, res) => {
- 
-  login(req.body.username, req.body.password)
-    .then(async result => {
-      if (result.message === 'Correct password') {
-        const token = generateToken({ username: req.body.username, role: result.user.role });
+//Login for security or user ////
+// Apply the rate limiter to the login route
+app.post('/login', loginLimiter, async (req, res) => {
+  try {
+    const result = await login(req.body.username, req.body.password);
 
-        // Check if the role is 'security' and fetch data of all users with role 'user'
-        let userData = [];
-        if (result.user.role === 'security') {
-          userData = await client.db('benr2423').collection('users').find({ role: 'user' }).toArray();
-        }
+    if (result.message === 'Correct password') {
+      // Reset the rate limit for successful login
+      loginLimiter.resetKey(req.ip);
 
-        res.send({ message: 'Successful login', token, userData });
-      } else {
-        res.send('Login unsuccessful');
+      const token = generateToken({ username: req.body.username, role: result.user.role });
+
+      // Check if the role is 'security' and fetch data of all users with role 'user'
+      let userData = [];
+      if (result.user.role === 'security') {
+        userData = await client.db('benr2423').collection('users').find({ role: 'user' }).toArray();
       }
-    })
-    .catch(error => {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    });
+
+      res.send({ message: 'Successful login', token, userData });
+    } else {
+      res.send('Login unsuccessful');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 //visitor view all security
@@ -474,7 +486,6 @@ function generateToken({ username, role }) {
   return jwt.sign({ username, role }, 'mypassword', { expiresIn: 300 });
 }
 
-
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
   if (!header) {
@@ -493,6 +504,9 @@ function verifyToken(req, res, next) {
     next();
   });
 }
+
+
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
