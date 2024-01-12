@@ -133,24 +133,6 @@ const allowedIPs = ['65.52.163.40', '207.46.150.78','207.46.144.65','137.116.164
 // Use the middleware directly
 app.use(ipAccessControl(allowedIPs, { mode: 'allow' }));
 
-//
-const https = require('https');
-const fs = require('fs');
-//const privateKeyPath = 'C:\\Users\\PC\\Desktop\\BENR 3433 Information Security\\my-express-app\\server.key'; // Update with your file path
-//const certificatePath = 'C:\\Users\\PC\\Desktop\\BENR 3433 Information Security\\my-express-app\\server.cert';
-const privateKeyPath = './server.key'; // Update with the relative path to your server.key file
-const certificatePath = './server.cert'; // Update with the relative path to your server.cert file
-
-const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
-const certificate = fs.readFileSync(certificatePath, 'utf8');
-
-const credentials = { key: privateKey, cert: certificate };
-const httpsServer = https.createServer(credentials, app);
-
-const cors = require('cors');
-app.use(cors());
-
-//
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -530,13 +512,11 @@ function verifyToken(req, res, next) {
 }
 
 
-httpsServer.listen(port, () => {
-  console.log(`HTTPS Server running on port ${port}`);
-});
 
-//app.listen(port, () => {
-//  console.log(`Server running on port ${port}`);
-//});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
 const register_users_Routes = require('./routes/register-user');
 app.use(register_users_Routes);
